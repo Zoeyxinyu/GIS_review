@@ -1,0 +1,55 @@
+---
+title: "Week 4 Homework"
+output: html_document
+---
+## Load packages
+
+```{r}
+library(tidyverse)
+library(sf)
+library(here)
+library(janitor)
+library(countrycode)
+```
+```{r}
+
+HDI <- read_csv(here::here("data","Gender Inequality Index (GII).csv"),
+                locale = locale(encoding = "latin1"),
+                na="..",skip=5)
+world <- st_read(here::here("data/World_Countries_(Generalized)","World_Countries__Generalized_.shp"))
+```
+## column names
+select columns we want and change country names to country code, using the countrycode package
+
+we could also join it without this on the country name column
+
+```{r}
+HDIcols <- HDI%>%
+  clean_names()%>%
+  select(country,x2019,x2010)%>% 
+  #why do we have x before 2019
+  #after clean_names(), the column names change and appear x
+  mutate(difference=x2019-x2010)%>%
+  slice(1:189,)%>%
+  mutate(iso_code=countrycode(HDIcols$country,origin = "country.name",destination = "iso2c"))# iso2c keep 2 characters
+# this is just a test
+
+  
+```
+
+## Join
+Join the csv to the world shapefile
+
+```{r}
+Join_HDI <- world%>%
+  clean_names()%>%
+  left_join(.,
+            HDIcols,
+            by=c("aff_iso"="iso_code"))
+```
+Functional sequence with the following components:
+
+1. left_join(.,Londondata,by=c("lad15cd"="new_code"))
+
+
+
